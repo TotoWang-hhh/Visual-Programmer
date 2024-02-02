@@ -20,6 +20,7 @@ import webbrowser
 import socket
 import json
 import warnings
+import pyvpmodules.editor as editor
 
 
 #全局变量
@@ -328,7 +329,7 @@ root.title('Python Visual Programmer')
 root.iconbitmap("./icon.ico")
 root.configure(background='#cccccc')
 root.minsize(540,320)
-root.geometry('720x480')
+root.geometry('800x600')
 
 #py_win_style.apply_style(root,'aero')
 
@@ -389,7 +390,7 @@ view_switch.pack(side=tk.RIGHT,fill=tk.Y)
 
 root.update()
 
-win=tkt.Canvas(root,width=root.winfo_width()-sidebar['width']-sidept['width'],
+win=editor.Editor(root,width=root.winfo_width()-sidebar['width']-sidept['width'],
                     height=root.winfo_height()-btmbar['height'],
                     x=sidebar['width']+sidept['width'],y=0,expand=False)
 
@@ -400,12 +401,8 @@ print('canvas width   ',root.winfo_width()-sidebar['width']-sidept['width'])
 
 root.update()
 
-win.place(x=sidebar['width']+sidept['width'],y=0)
-
 canvasresize_t=threading.Thread(target=lambda:resize(root,notframex=sidebar['width']+sidept['width'],notframey=btmbar['height']))
 canvasresize_t.start()
-
-tkt.Label(win, 50, 50, 250, 100, text='工作区（主区域）\n此处待完善')
 
 # 手动指定服务器
 if global_server_addr=='ask':
