@@ -1,3 +1,19 @@
+# About This Branch
+
+This branch (`client-demo`) is only for showing the final **appearance** of the software. **It is not able to be used for production or even for trying.**
+
+The branch only includes client while updater and server have been removed from here.
+
+The client in this branch requires tkintertools 3.0 dev versions which is already included inside the `/client/` folder.
+
+If you want to see our latest progress, please switch to `main` branch.
+
+## About tkintertools included in this branch
+
+This branch includes tkintretools dev version. **Please do not use it in any other case!**
+
+The tkintertools included in this branch is an unstable version which might and really contains plenty of bugs and a few modifies for it to run on older versions of Python.
+
 <div align="center">
 
 # 🚀Visual Programmer🚀

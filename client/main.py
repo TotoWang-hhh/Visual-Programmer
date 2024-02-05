@@ -96,77 +96,6 @@ startwin.destroy()
 
 
 # 类与函数
-def resize(parent, #type: tk.Tk | tk.Toplevel
-           notframex, #type: int
-           notframey  #type: int
-           ):
-    '''
-    parent    Canvas所在的窗口
-    notframex Canvas以外的长度（很抽象），就是窗口宽-Canvas宽
-    notframey Canvas以外的高度（也很抽象），就是窗口高-Canvas高
-
-    魔改自tkt > __main__.py > Tk() > _zoom()
-    '''
-    while True:
-        width, height = map(int, parent.geometry().split('+')[0].split('x'))
-        width-=notframex
-        height-=notframey
-        # NOTE: 此处必须用 geometry 方法，直接用 Event 或者 winfo 会有画面异常的 bug
-
-        if width != parent.width[1] and height != parent.height[1]:  # 没有大小的改变
-            #print('resize canvas to '+'W:'+str(width)+'  '+'H:'+str(height))
-            for canvas in parent._canvas:
-                if canvas._lock:
-                    _resize(canvas,width/canvas.width[1], height/canvas.height[1])
-
-            parent.width[1], parent.height[1] = width, height  # 更新窗口当前的宽高值
-
-def _resize(self, rate_x=None, rate_y=None):
-    """
-    ### 缩放画布及其内部的所有元素
-    `rate_x`: 横向缩放比率，默认值表示自动更新缩放（根据窗口缩放程度）
-    `rate_y`: 纵向缩放比率，默认值同上
-    """
-    if not rate_x:
-        rate_x = self.master.width[1]/self.master.width[0]/self.rx
-    if not rate_y:
-        rate_y = self.master.height[1]/self.master.height[0]/self.ry
-    rate_x_pos, rate_y_pos = rate_x, rate_y  # 避免受 keep 影响
-    if self.keep is True:  # 维持比例
-        rx = rate_x*self.master.width[1]/self.master.width[0]/self.rx
-        ry = rate_y*self.master.height[1]/self.master.height[0]/self.ry
-        rate_x = rate_y = min(rx, ry)
-    # 更新画布的位置及大小的数据
-    self.width[1] *= rate_x
-    self.height[1] *= rate_y
-    temp_x, self.rx = self.rx, self.width[1]/self.width[0]
-    temp_y, self.ry = self.ry, self.height[1]/self.height[0]
-    place_info = self.place_info()
-    tk.Canvas.place(  # 更新画布的位置及大小
-        self,
-        width=self.width[1],
-        height=self.height[1],)
-        #x=float(place_info['x'])*rate_x_pos,
-        #y=float(place_info['y'])*rate_y_pos)
-    for widget in self._widget:  # 更新子画布控件的子虚拟画布控件位置数据
-        widget.x1 *= rate_x
-        widget.x2 *= rate_x
-        widget.y1 *= rate_y
-        widget.y2 *= rate_y
-    for item in self.find_all():  # item 位置缩放
-        self.coords(
-            item, *[c*(rate_x, rate_y)[i & 1] for i, c in enumerate(self.coords(item))])
-    for item in self._font:  # 字体大小缩放
-        self._font[item][1] *= math.sqrt(rate_x*rate_y)
-        font = self._font[item][:]
-        font[1] = int(font[1])
-        self.itemconfigure(item, font=font)
-    for item in self._image:  # 图像大小缩放（采用相对的绝对缩放）
-        if self._image[item][0] and self._image[item][0].extension != 'gif':
-            self._image[item][1] = self._image[item][0].zoom(
-                temp_x*rate_x, temp_y*rate_y, 1.2)
-            self.itemconfigure(item, image=self._image[item][1])
-
 def launch(funcid):
     '''根据传入的字符串找到并执行函数'''
     funcid_splited=funcid.split('.')
@@ -176,7 +105,7 @@ def launch(funcid):
                 case '0':
                     change_sidept_page('file')
                 case '1':
-                    print('code')
+                    change_sidept_page('code')
                 case '2':
                     print('function')
                 case '3':
@@ -206,12 +135,13 @@ def get_fr_server(send_data):
     return res
 
 def change_sidept_page(pagename):
-    global fileframe
-    sidept_pages={'file':fileframe}
+    global fileframe,resframe
+    sidept_pages={'file':fileframe,'code':resframe}
     global global_sidept_currpage
     sidept_pages[global_sidept_currpage].pack_forget()
     sidept_pages[pagename].pack(fill=tk.BOTH,expand=True)
     sidept_pages[pagename].pack_propagate(False)
+    global_sidept_currpage=pagename
 
 def about():
     global global_ver,about_updtxt,global_server_addr,global_about_useslist
@@ -369,6 +299,11 @@ file_rightclick_menu=tttk.Menu(root,{'剪切':lambda:pyvpclipboard.cut(main_file
                                      '永久删除':lambda:print('del'),'重命名':lambda:print('rename')})
 main_file_viewer.tree.bind('<Button-3>',lambda event:file_rightclick_menu.show() if len(main_file_viewer.tree.focus())!=0 else None)
 
+resframe=tk.Frame(sidept,bg='#ffffff',width=200)
+tk.Label(resframe,text='资源库',bg='#ffffff',anchor='w').pack(fill=tk.X)
+
+resframe.pack_propagate(False)
+
 sidept.pack(side=tk.LEFT,fill=tk.Y)
 
 status_color='#00aa00'
@@ -390,8 +325,17 @@ view_switch.pack(side=tk.RIGHT,fill=tk.Y)
 root.update()
 
 # win=editor.Editor(root)
-win = tk.Canvas(root, height=600)
-win.pack(fill='both')
+win = tk.Frame(root)
+win.pack(fill='both',expand=True)
+win.pack_propagate(False)
+
+right_pt=tk.Frame(win,width=240,bg='#eeeeee')
+right_pt.pack(fill=tk.Y,side=tk.RIGHT)
+right_pt.pack_propagate(False)
+
+program_pt=tk.Frame(win,bg='#cccccc')
+program_pt.pack(fill=tk.BOTH,expand=True)
+
 
 print('root width   ',root.winfo_width())
 print('sidebar width   ',sidebar['width'])
