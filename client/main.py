@@ -26,7 +26,7 @@ import pyvpmodules.editor as editor
 #全局变量
 global_ver='.beforever'
 global_debug={'net':False}
-global_server_addr=('116.198.35.73',10009)
+global_server_addr=("116.198.35.73", 10009)
 global_about_useslist={'Python':"https://www.python.org/",'xiaokang2022/tkintertools':"https://github.com/xiaokang2022/tkintertools/",
                        'spyoungtech/pyclip':"https://github.com/spyoungtech/pyclip/",'totowang-hhh/tttk':"https://github.com/totowang-hhh/tttk/"}
 
@@ -124,7 +124,7 @@ def resize(parent, #type: tk.Tk | tk.Toplevel
 def _resize(self, rate_x=None, rate_y=None):
     """
     ### 缩放画布及其内部的所有元素
-    `rate_x`: 横向缩放比率，默认值表示自动更新缩放（根据窗口缩放程度） \ 
+    `rate_x`: 横向缩放比率，默认值表示自动更新缩放（根据窗口缩放程度）
     `rate_y`: 纵向缩放比率，默认值同上
     """
     if not rate_x:
@@ -323,13 +323,12 @@ def change_file(selection:str):
             btn.disable()
             #print(btn.disablefg,btn.fg)
 
-
 root.deiconify()
 root.title('Python Visual Programmer')
 root.iconbitmap("./icon.ico")
 root.configure(background='#cccccc')
 root.minsize(540,320)
-root.geometry('800x600')
+root.geometry(size=(800, 600))
 
 #py_win_style.apply_style(root,'aero')
 
@@ -390,9 +389,9 @@ view_switch.pack(side=tk.RIGHT,fill=tk.Y)
 
 root.update()
 
-win=editor.Editor(root,width=root.winfo_width()-sidebar['width']-sidept['width'],
-                    height=root.winfo_height()-btmbar['height'],
-                    x=sidebar['width']+sidept['width'],y=0,expand=False)
+# win=editor.Editor(root)
+win = tk.Canvas(root, height=600)
+win.pack(fill='both')
 
 print('root width   ',root.winfo_width())
 print('sidebar width   ',sidebar['width'])
@@ -400,9 +399,6 @@ print('sidept width   ',sidept['width'])
 print('canvas width   ',root.winfo_width()-sidebar['width']-sidept['width'])
 
 root.update()
-
-canvasresize_t=threading.Thread(target=lambda:resize(root,notframex=sidebar['width']+sidept['width'],notframey=btmbar['height']))
-canvasresize_t.start()
 
 # 手动指定服务器
 if global_server_addr=='ask':
