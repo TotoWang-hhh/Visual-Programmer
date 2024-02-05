@@ -11,7 +11,7 @@ A visual programming software based on the tkinter GUI tool in the Python langua
 [![License](https://img.shields.io/pypi/l/visual-programmer?label=License)](LICENSE.txt)
 [![ChangeLog](https://img.shields.io/badge/ChangeLog-2023/07/28-orange)](CHANGELOG.md)
 [![ToDo](https://img.shields.io/badge/ToDo-0-yellow)](TODO.md)
-[![Size](https://img.shields.io/github/languages/code-size/Xiaokang2022/visual-programmer?label=Size)](visual-programmer)\
+[![Size](https://img.shields.io/github/languages/code-size/pyvp-team/visual-programmer?label=Size)](visual-programmer)\
 [![Downloads](https://img.shields.io/pypi/dm/visual-programmer?label=Downloads&logo=pypi)](https://pypistats.org/packages/visual-programmer)
 [![Owner](https://img.shields.io/badge/Owner-Xiaokang2022-white)](https://github.com/Xiaokang2022)
 [![Blog](https://img.shields.io/badge/Blog-小康2022@CSDN-red)](https://xiaokang2022.blog.csdn.net)
