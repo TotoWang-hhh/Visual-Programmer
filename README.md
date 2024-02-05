@@ -10,7 +10,7 @@ If you want to see our latest progress, please switch to `main` branch.
 
 ## About tkintertools included in this branch
 
-This branch includes tkintretools dev version. **Please do not use it in any other case!**
+This branch includes tkintretools dev version. **Please do not use it in any other cases!**
 
 The tkintertools included in this branch is an unstable version which might and really contains plenty of bugs and a few modifies for it to run on older versions of Python.
 
