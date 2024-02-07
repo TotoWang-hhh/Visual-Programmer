@@ -7,26 +7,29 @@ import tkinter.ttk as ttk
 import tkintertools as tkt
 import tttk
 import tkinter.messagebox as msgbox
+import tkinter.simpledialog as sd
+
 import os
 import sys
 import time
-from PIL import ImageTk, Image
 import threading
 import math
+
 import pyvpmodules.ui as ui
 import pyvpmodules.clipboard as clipboard
+import pyvpmodules.editor as editor
+
+from PIL import ImageTk, Image
 import pyclip
 import webbrowser
 import socket
 import json
 import warnings
-import pyvpmodules.editor as editor
 import ast
-import tkinter.simpledialog as sd
 
 
 # 全局变量
-global_ver = '.beforever'
+global_ver = '.demo'
 global_debug = {'net': False}
 global_server_addr = ("116.198.35.73", 10009)
 global_about_useslist = {'Python': "https://www.python.org/", 'xiaokang2022/tkintertools': "https://github.com/xiaokang2022/tkintertools/",
@@ -123,6 +126,7 @@ def launch(funcid):
                     change_mainpt_page('class')
                 case '4':
                     change_sidept_page('modules')
+                    change_sidept_page('modules')
                 case _:
                     msgbox.showerror(
                         '错误', 'launch()没有根据给定的id找到相应的函数\n出错id层级: '+funcid_splited[1])
@@ -143,8 +147,10 @@ def launch(funcid):
 def get_fr_server(send_data):
     global global_server_addr
     skt = socket.socket()
+    print('[get_fr_server()] Connecting to server...')
     skt.connect(global_server_addr)
     skt.send(json.dumps(send_data).encode('utf-8'))
+    print('[get_fr_server()] Waiting for response from server...')
     res = json.loads(skt.recv(1024).decode('utf-8'))
     skt.close()
     return res
@@ -162,13 +168,13 @@ def change_sidept_page(pagename):
 
 def change_mainpt_page(pagename):
     global welcomepage,editpage
-    mainpt_pages = {'file': welcomepage, 'code': editpage,
+    mainpt_pages = {'spare': welcomepage, 'file': welcomepage, 'code': editpage,
                     'func': welcomepage, 'class': welcomepage, 'modules': welcomepage}
-    global global_sidept_currpage
-    mainpt_pages[global_sidept_currpage].pack_forget()
+    global global_mainpt_currpage
+    mainpt_pages[global_mainpt_currpage].pack_forget()
     mainpt_pages[pagename].pack(fill=tk.BOTH, expand=True)
     mainpt_pages[pagename].pack_propagate(False)
-    global_sidept_currpage = pagename
+    global_mainpt_currpage = pagename
 
 def about():
     global global_ver, about_updtxt, global_server_addr, global_about_useslist
@@ -234,6 +240,29 @@ def about():
     aboutwin.mainloop()
 
 
+def scan_class():
+    #print('Scanning Class...')
+    try:
+        classes = find_classes_in_file(global_file[0])
+        for names in classes:
+            classlist.insert('end', names)
+        #classlist.pack(fill='both', expand=True)
+    except IndexError as e:
+        print(e)
+        msgbox.showerror("错误", "请先选择一个文件！\n\n详细错误信息请见console。")
+
+def create_new_class():
+    name = sd.askstring("新类", "新类名称：")
+    classlist.insert('end', name)
+    # 创建新类的逻辑
+
+def del_sel_class():
+    sel = classlist.curselection()
+    for i in sel:
+        print(classlist.get(i))
+    # 删除类的逻辑
+
+
 def submit_server_addr(ip_enter, port_enter, askwin=None):
     global global_server_addr
     isvalid = True
@@ -280,20 +309,26 @@ def change_file(selection: str):
     global view_btns
     file = selection['values'][0]
     print("已选择文件："+str(file))
-    # 根据文件后缀决定是否允许视图切换
+    # 根据文件后缀决定是否执行针对.py文件的内容
     if file.split('.')[len(file.split('.'))-1].lower() == 'py':
+        print('Opened .py file running extra tasks...')
         # print('Still not availale')
+        # 启用/禁用视图切换
         for btn in view_btns:
             btn.enable()
+        # 加载文件代码
+        open_code(selection)
+        # 读取文件内的类
+        scan_class()
     else:
         for btn in view_btns:
             btn.disable()
-            # print(btn.disablefg,btn.fg)
+            # print(btn.disablefg,btn.fg
 
 
-def open_file(item):
-    # 打开所选的文件（包含所有）
-    file_path = main_file_viewer.tree.item(item)['values'][0]
+def open_code(selection):
+    # 读取所选的文件 加载代码
+    file_path = selection['values'][0]
     pf = open(file_path, 'r', encoding='utf-8')
     data = pf.read()
     if code.get('1.0', tk.END) == '':
@@ -306,24 +341,31 @@ def open_file(item):
 
 
 def find_classes_in_file(filename):
+    print("Scanning for and listing classes...")
     with open(filename, "r", encoding='utf-8') as file:
         node = ast.parse(file.read(), filename=filename)
-
     class_names = []
-
     for item in ast.walk(node):
         if isinstance(item, ast.ClassDef):
             class_names.append(item.name)
-
     return class_names
 
 
+# Things in console #
+if not '--noclear' in sys.argv:
+    if os.name=='nt':
+        os.system('cls')
+    else:
+        os.system('clear')
+
+
+# UI BELOW #
 root.deiconify()
 root.title('Python Visual Programmer')
 root.iconbitmap("./icon.ico")
 root.configure(background='#cccccc')
-root.minsize(540, 360)
-root.geometry(size=(720, 540))
+root.minsize(640, 360)
+root.geometry(size=(800, 540))
 
 # py_win_style.apply_style(root,'aero')
 
@@ -350,6 +392,7 @@ for img in sidebarbtmimg:
 sidept = tk.Frame(root, bg='#ffffff', width=200)
 
 global_sidept_currpage = 'file'
+global_mainpt_currpage = 'spare'
 
 fileframe = tk.Frame(sidept, bg='#ffffff', width=200)
 tk.Label(fileframe, text='FILES', bg='#ffffff', anchor='w').pack(fill=tk.X)
@@ -366,8 +409,8 @@ file_rightclick_menu = tttk.Menu(root, {'剪切': lambda: pyvpclipboard.cut(main
                                         '永久删除': lambda: print('del'), '重命名': lambda: print('rename')})
 main_file_viewer.tree.bind('<Button-3>', lambda event: file_rightclick_menu.show()
                            if len(main_file_viewer.tree.focus()) != 0 else None)
-main_file_viewer.tree.bind(
-    '<<TreeviewSelect>>', lambda _event: open_file(main_file_viewer.tree.focus()))
+#main_file_viewer.tree.bind(
+#    '<<TreeviewSelect>>', lambda _event: change_file(main_file_viewer.tree.focus()))
 
 resframe = tk.Frame(sidept, bg='#ffffff', width=200)
 tk.Label(resframe, text='资源库', bg='#ffffff', anchor='w').pack(fill=tk.X)
@@ -382,34 +425,16 @@ functionframe.pack_propagate(False)
 classframe = tk.Frame(sidept, bg='#ffffff', width=200)
 tk.Label(classframe, text='本文件中的类', bg='#ffffff', anchor=tk.W).pack(fill=tk.X)
 
-classlist = tk.Listbox(
-                        classframe, bg='#ffffff', relief='flat', bd=0, selectmode=tk.SINGLE)
-                    try:
-                        classes = find_classes_in_file(global_file[0])
-                        for names in classes:
-                            classlist.insert('end', names)
-                        classlist.pack(fill='both', expand=True)
-                    except IndexError:
-                        msgbox.showerror("错误", "请先选择一个文件！")
-
-                    def create_new_class():
-                        name = sd.askstring("新类", "新类名称：")
-                        classlist.insert('end', name)
-                        # 创建新类的逻辑
-
-                    def del_sel_class():
-                        sel = classlist.curselection()
-                        for i in sel:
-                            print(classlist.get(i))
-                        # 删除类的逻辑
-                    bottombar = tk.Frame(classframe, bg='#eeeeee', height=20)
-                    bottombar.pack(fill=tk.X, side='bottom')
-                    newclass = ui.FlatButton(
-                        bottombar, text='新类', bg='#eeeeee', fg='#000000', command=create_new_class)
-                    newclass.pack(side='left', fill='x', expand=True)
-                    delsel = ui.FlatButton(
-                        bottombar, text='移除选中', bg='#eeeeee', fg='#000000', command=del_sel_class)
-                    delsel.pack(side='right', fill='x', expand=True)
+classlist = tk.Listbox(classframe, bg='#ffffff', relief='flat', bd=0, selectmode=tk.SINGLE)
+classlist.pack(fill='both', expand=True)
+bottombar = tk.Frame(classframe, bg='#eeeeee', height=20)
+bottombar.pack(fill=tk.X, side='bottom')
+newclass = ui.FlatButton(
+    bottombar, text='新类', bg='#eeeeee', fg='#000000', command=create_new_class)
+newclass.pack(side='left', fill='x', expand=True)
+delsel = ui.FlatButton(
+    bottombar, text='移除选中', bg='#eeeeee', fg='#000000', command=del_sel_class)
+delsel.pack(side='right', fill='x', expand=True)
 
 classframe.pack_propagate(False)
 
@@ -453,7 +478,7 @@ tk.Label(welcomepage,image=icon96_tk).pack()
 tk.Label(welcomepage,text="Welcome to",font=("consolas",20)).pack()
 tk.Label(welcomepage,text="PyVP",font=("consolas",25)).pack()
 tk.Label(welcomepage,text="",font=("consolas",20)).pack()
-tk.Label(welcomepage,text="Where should we start?",font=("consolas",14)).pack()
+tk.Label(welcomepage,text="Where should we start from?",font=("consolas",14)).pack()
 
 
 editpage=tk.Frame(win)
