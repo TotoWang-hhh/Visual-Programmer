@@ -85,6 +85,9 @@ sidebarbtmimgpil.append(Image.open("./img/sidebarbtm/run.png"))
 for imgpil in sidebarbtmimgpil:
     sidebarbtmimg.append(ImageTk.PhotoImage(image=imgpil))
 
+#其他图像资源
+icon96_pil = icon_pil.resize((96, 96))
+icon96_tk = ImageTk.PhotoImage(image=icon96_pil)
 
 # 准备完成后的拖延时间
 for i in range(0, 20):
@@ -108,40 +111,16 @@ def launch(funcid):
             match funcid_splited[1]:
                 case '0':
                     change_sidept_page('file')
+                    change_mainpt_page('file')
                 case '1':
                     change_sidept_page('code')
+                    change_mainpt_page('code')
                 case '2':
                     change_sidept_page('func')
+                    change_mainpt_page('func')
                 case '3':
                     change_sidept_page('class')
-                    classlist = tk.Listbox(
-                        classframe, bg='#ffffff', relief='flat', bd=0, selectmode=tk.SINGLE)
-                    try:
-                        classes = find_classes_in_file(global_file[0])
-                        for names in classes:
-                            classlist.insert('end', names)
-                        classlist.pack(fill='both', expand=True)
-                    except IndexError:
-                        msgbox.showerror("错误", "请先选择一个文件！")
-
-                    def create_new_class():
-                        name = sd.askstring("新类", "新类名称：")
-                        classlist.insert('end', name)
-                        # 创建新类的逻辑
-
-                    def del_sel_class():
-                        sel = classlist.curselection()
-                        for i in sel:
-                            print(classlist.get(i))
-                        # 删除类的逻辑
-                    bottombar = tk.Frame(classframe, bg='#eeeeee', height=20)
-                    bottombar.pack(fill=tk.X, side='bottom')
-                    newclass = ui.FlatButton(
-                        bottombar, text='新类', bg='#eeeeee', fg='#000000', command=create_new_class)
-                    newclass.pack(side='left', fill='x', expand=True)
-                    delsel = ui.FlatButton(
-                        bottombar, text='移除选中', bg='#eeeeee', fg='#000000', command=del_sel_class)
-                    delsel.pack(side='right', fill='x', expand=True)
+                    change_mainpt_page('class')
                 case '4':
                     change_sidept_page('modules')
                 case _:
@@ -181,6 +160,15 @@ def change_sidept_page(pagename):
     sidept_pages[pagename].pack_propagate(False)
     global_sidept_currpage = pagename
 
+def change_mainpt_page(pagename):
+    global welcomepage,editpage
+    mainpt_pages = {'file': welcomepage, 'code': editpage,
+                    'func': welcomepage, 'class': welcomepage, 'modules': welcomepage}
+    global global_sidept_currpage
+    mainpt_pages[global_sidept_currpage].pack_forget()
+    mainpt_pages[pagename].pack(fill=tk.BOTH, expand=True)
+    mainpt_pages[pagename].pack_propagate(False)
+    global_sidept_currpage = pagename
 
 def about():
     global global_ver, about_updtxt, global_server_addr, global_about_useslist
@@ -334,8 +322,8 @@ root.deiconify()
 root.title('Python Visual Programmer')
 root.iconbitmap("./icon.ico")
 root.configure(background='#cccccc')
-root.minsize(540, 320)
-root.geometry(size=(800, 600))
+root.minsize(540, 360)
+root.geometry(size=(720, 540))
 
 # py_win_style.apply_style(root,'aero')
 
@@ -394,6 +382,35 @@ functionframe.pack_propagate(False)
 classframe = tk.Frame(sidept, bg='#ffffff', width=200)
 tk.Label(classframe, text='本文件中的类', bg='#ffffff', anchor=tk.W).pack(fill=tk.X)
 
+classlist = tk.Listbox(
+                        classframe, bg='#ffffff', relief='flat', bd=0, selectmode=tk.SINGLE)
+                    try:
+                        classes = find_classes_in_file(global_file[0])
+                        for names in classes:
+                            classlist.insert('end', names)
+                        classlist.pack(fill='both', expand=True)
+                    except IndexError:
+                        msgbox.showerror("错误", "请先选择一个文件！")
+
+                    def create_new_class():
+                        name = sd.askstring("新类", "新类名称：")
+                        classlist.insert('end', name)
+                        # 创建新类的逻辑
+
+                    def del_sel_class():
+                        sel = classlist.curselection()
+                        for i in sel:
+                            print(classlist.get(i))
+                        # 删除类的逻辑
+                    bottombar = tk.Frame(classframe, bg='#eeeeee', height=20)
+                    bottombar.pack(fill=tk.X, side='bottom')
+                    newclass = ui.FlatButton(
+                        bottombar, text='新类', bg='#eeeeee', fg='#000000', command=create_new_class)
+                    newclass.pack(side='left', fill='x', expand=True)
+                    delsel = ui.FlatButton(
+                        bottombar, text='移除选中', bg='#eeeeee', fg='#000000', command=del_sel_class)
+                    delsel.pack(side='right', fill='x', expand=True)
+
 classframe.pack_propagate(False)
 
 moduleframe = tk.Frame(sidept, bg='#ffffff', width=200)
@@ -429,7 +446,19 @@ win = tk.Frame(root)  # 左侧Frame
 win.pack(fill='both', expand=True)
 win.pack_propagate(False)
 
-right_pt = tk.Frame(win, width=240, bg='#eeeeee')  # 右侧Frame
+
+welcomepage=tk.Frame(win)
+tk.Label(welcomepage,text="",font=("consolas",20)).pack()
+tk.Label(welcomepage,image=icon96_tk).pack()
+tk.Label(welcomepage,text="Welcome to",font=("consolas",20)).pack()
+tk.Label(welcomepage,text="PyVP",font=("consolas",25)).pack()
+tk.Label(welcomepage,text="",font=("consolas",20)).pack()
+tk.Label(welcomepage,text="Where should we start?",font=("consolas",14)).pack()
+
+
+editpage=tk.Frame(win)
+
+right_pt = tk.Frame(editpage, width=240, bg='#eeeeee')  # 右侧Frame
 right_pt.pack(fill=tk.Y, side=tk.RIGHT)
 right_pt.pack_propagate(False)
 
@@ -437,8 +466,12 @@ code = tk.Text(right_pt, width=240, bg='#000000', fg='#ffffff',
                font=('Consolas',), height=10)  # 代码区域
 code.pack(side='bottom', fill='x', expand=False)
 
-program_pt = tk.Frame(win, bg='#cccccc')
+program_pt = tk.Frame(editpage, bg='#cccccc')
 program_pt.pack(fill=tk.BOTH, expand=True)
+
+
+welcomepage.pack(fill=tk.BOTH, expand=True)
+
 
 print('root width   ', root.winfo_width())
 print('sidebar width   ', sidebar['width'])
