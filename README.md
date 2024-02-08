@@ -16,7 +16,7 @@ A visual programming software based on the tkinter GUI tool in the Python langua
 [![Owner](https://img.shields.io/badge/Owner-Xiaokang2022-white)](https://github.com/Xiaokang2022)
 [![Blog](https://img.shields.io/badge/Blog-小康2022@CSDN-red)](https://xiaokang2022.blog.csdn.net)
 [![Email 1](https://img.shields.io/badge/Email-2951256653@qq.com-cyan)](mailto:2951256653@qq.com)
-[![Email 2](https://img.shields.io/badge/Email-tt1224@hotmail.com)](mailto:tt1224@hotmail.com)
+[![Email 2](https://img.shields.io/badge/Email-tt1224@hotmail.com-cyan)](mailto:tt1224@hotmail.com)
 
 [![Insights](https://repobeats.axiom.co/api/embed/8ca8f9c3d10063593e3fa02320688e46772a3369.svg)](https://github.com/pyvp-team/visual-programmer/pulse)
 
