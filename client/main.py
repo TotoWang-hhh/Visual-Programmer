@@ -8,6 +8,7 @@ import tkintertools as tkt
 import tttk
 import tkinter.messagebox as msgbox
 import tkinter.simpledialog as sd
+import tkinter.filedialog as fd
 
 import os
 import sys
@@ -88,7 +89,7 @@ sidebarbtmimgpil.append(Image.open("./img/sidebarbtm/run.png"))
 for imgpil in sidebarbtmimgpil:
     sidebarbtmimg.append(ImageTk.PhotoImage(image=imgpil))
 
-#其他图像资源
+# 其他图像资源
 icon96_pil = icon_pil.resize((96, 96))
 icon96_tk = ImageTk.PhotoImage(image=icon96_pil)
 
@@ -126,7 +127,7 @@ def launch(funcid):
                     change_mainpt_page('class')
                 case '4':
                     change_sidept_page('modules')
-                    change_sidept_page('modules')
+                    change_mainpt_page('modules')
                 case _:
                     msgbox.showerror(
                         '错误', 'launch()没有根据给定的id找到相应的函数\n出错id层级: '+funcid_splited[1])
@@ -166,8 +167,9 @@ def change_sidept_page(pagename):
     sidept_pages[pagename].pack_propagate(False)
     global_sidept_currpage = pagename
 
+
 def change_mainpt_page(pagename):
-    global welcomepage,editpage
+    global welcomepage, editpage
     mainpt_pages = {'spare': welcomepage, 'file': welcomepage, 'code': editpage,
                     'func': welcomepage, 'class': welcomepage, 'modules': welcomepage}
     global global_mainpt_currpage
@@ -175,6 +177,7 @@ def change_mainpt_page(pagename):
     mainpt_pages[pagename].pack(fill=tk.BOTH, expand=True)
     mainpt_pages[pagename].pack_propagate(False)
     global_mainpt_currpage = pagename
+
 
 def about():
     global global_ver, about_updtxt, global_server_addr, global_about_useslist
@@ -241,26 +244,28 @@ def about():
 
 
 def scan_class():
-    #print('Scanning Class...')
+    # print('Scanning Class...')
     try:
-        classes = find_classes_in_file(global_file[0])
+        classes = find_classes_in_file(global_file[0]) # BUG: 当切换文件时无法切换索引
         for names in classes:
             classlist.insert('end', names)
-        #classlist.pack(fill='both', expand=True)
+        # classlist.pack(fill='both', expand=True)
     except IndexError as e:
         print(e)
-        msgbox.showerror("错误", "请先选择一个文件！\n\n详细错误信息请见console。")
+        msgbox.showerror("错误", "请先选择一个文件！\n\n详细错误信息请见Console。")
 
-def create_new_class():
-    name = sd.askstring("新类", "新类名称：")
-    classlist.insert('end', name)
-    # 创建新类的逻辑
+
+def create_new_class(): # BUG: 无法添加新的列表项
+    ask = ui.Dialog(root, "创建新类", ["新类名", "继承名"], btntext="确定")
+    ask.mainloop()
+    classlist.insert("end", ask.combine_entries()[1])
+
 
 def del_sel_class():
     sel = classlist.curselection()
     for i in sel:
         print(classlist.get(i))
-    # 删除类的逻辑
+        classlist.delete(i)
 
 
 def submit_server_addr(ip_enter, port_enter, askwin=None):
@@ -340,6 +345,13 @@ def open_code(selection):
     pf.close()
 
 
+def save_code():
+    data = code.get("1.0", "end")
+    filename = fd.asksaveasfilename()
+    with open(filename, 'w', encoding="utf-8") as sf:
+        sf.write(data)
+
+
 def find_classes_in_file(filename):
     print("Scanning for and listing classes...")
     with open(filename, "r", encoding='utf-8') as file:
@@ -353,7 +365,7 @@ def find_classes_in_file(filename):
 
 # Things in console #
 if not '--noclear' in sys.argv:
-    if os.name=='nt':
+    if os.name == 'nt':
         os.system('cls')
     else:
         os.system('clear')
@@ -409,7 +421,7 @@ file_rightclick_menu = tttk.Menu(root, {'剪切': lambda: pyvpclipboard.cut(main
                                         '永久删除': lambda: print('del'), '重命名': lambda: print('rename')})
 main_file_viewer.tree.bind('<Button-3>', lambda event: file_rightclick_menu.show()
                            if len(main_file_viewer.tree.focus()) != 0 else None)
-#main_file_viewer.tree.bind(
+# main_file_viewer.tree.bind(
 #    '<<TreeviewSelect>>', lambda _event: change_file(main_file_viewer.tree.focus()))
 
 resframe = tk.Frame(sidept, bg='#ffffff', width=200)
@@ -425,7 +437,8 @@ functionframe.pack_propagate(False)
 classframe = tk.Frame(sidept, bg='#ffffff', width=200)
 tk.Label(classframe, text='本文件中的类', bg='#ffffff', anchor=tk.W).pack(fill=tk.X)
 
-classlist = tk.Listbox(classframe, bg='#ffffff', relief='flat', bd=0, selectmode=tk.SINGLE)
+classlist = tk.Listbox(classframe, bg='#ffffff',
+                       relief='flat', bd=0, selectmode=tk.SINGLE)
 classlist.pack(fill='both', expand=True)
 bottombar = tk.Frame(classframe, bg='#eeeeee', height=20)
 bottombar.pack(fill=tk.X, side='bottom')
@@ -472,16 +485,17 @@ win.pack(fill='both', expand=True)
 win.pack_propagate(False)
 
 
-welcomepage=tk.Frame(win)
-tk.Label(welcomepage,text="",font=("consolas",20)).pack()
-tk.Label(welcomepage,image=icon96_tk).pack()
-tk.Label(welcomepage,text="Welcome to",font=("consolas",20)).pack()
-tk.Label(welcomepage,text="PyVP",font=("consolas",25)).pack()
-tk.Label(welcomepage,text="",font=("consolas",20)).pack()
-tk.Label(welcomepage,text="Where should we start from?",font=("consolas",14)).pack()
+welcomepage = tk.Frame(win)
+tk.Label(welcomepage, text="", font=("consolas", 20)).pack()
+tk.Label(welcomepage, image=icon96_tk).pack()
+tk.Label(welcomepage, text="Welcome to", font=("consolas", 20)).pack()
+tk.Label(welcomepage, text="PyVP", font=("consolas", 25)).pack()
+tk.Label(welcomepage, text="", font=("consolas", 20)).pack()
+tk.Label(welcomepage, text="Where should we start from?",
+         font=("consolas", 14)).pack()
 
 
-editpage=tk.Frame(win)
+editpage = tk.Frame(win)
 
 right_pt = tk.Frame(editpage, width=240, bg='#eeeeee')  # 右侧Frame
 right_pt.pack(fill=tk.Y, side=tk.RIGHT)
@@ -510,5 +524,7 @@ if global_server_addr == 'ask':
     ask_server_addr(root_win=root)
 
 main_file_viewer.sync_t.start()
+
+root.protocol("WM_DELETE_WINDOW", lambda: os._exit(1))  # 防止主进程没杀死的问题
 
 root.mainloop()
