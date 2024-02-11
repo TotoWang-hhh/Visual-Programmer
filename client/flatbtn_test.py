@@ -27,5 +27,10 @@ anmbtn=ui.AnimatedButton(win,win,text='AnimatedButton',bg='#cccccc',fg='#000000'
                         command=lambda:msgbox.showinfo('Message','You clicked the button'))
 anmbtn.pack(padx=25,pady=10)
 
+changetxt_btn=ui.FlatButton(win,text='Hit Me to Change the Text!')
+changetxt_btn.command=lambda:exec("changetxt_btn['text']='TEXT CHANGED!'")
+changetxt_btn.reprop()
+changetxt_btn.pack(padx=25,pady=10)
+
 
 win.mainloop()

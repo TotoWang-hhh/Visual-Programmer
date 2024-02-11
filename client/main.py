@@ -14,14 +14,14 @@ import os
 import sys
 import time
 import threading
-import math
+#import math
 
 import pyvpmodules.ui as ui
 import pyvpmodules.clipboard as clipboard
 import pyvpmodules.editor as editor
 
 from PIL import ImageTk, Image
-import pyclip
+#import pyclip
 import webbrowser
 import socket
 import json
@@ -32,7 +32,7 @@ import ast
 # 全局变量
 global_ver = '.demo'
 global_debug = {'net': False}
-global_server_addr = ("116.198.35.73", 10009)
+global_server_addr = ("116.198.35.73", 10008)
 global_about_useslist = {'Python': "https://www.python.org/", 'xiaokang2022/tkintertools': "https://github.com/xiaokang2022/tkintertools/",
                          'spyoungtech/pyclip': "https://github.com/spyoungtech/pyclip/", 'totowang-hhh/tttk': "https://github.com/totowang-hhh/tttk/"}
 global_file = []
@@ -144,7 +144,6 @@ def launch(funcid):
             msgbox.showerror(
                 '错误', 'launch()没有根据给定的id找到相应的函数\n出错id层级: '+funcid_splited[0])
 
-
 def get_fr_server(send_data):
     global global_server_addr
     skt = socket.socket()
@@ -156,7 +155,6 @@ def get_fr_server(send_data):
     skt.close()
     return res
 
-
 def change_sidept_page(pagename):
     global fileframe, resframe, functionframe, classframe, moduleframe
     sidept_pages = {'file': fileframe, 'code': resframe,
@@ -167,7 +165,6 @@ def change_sidept_page(pagename):
     sidept_pages[pagename].pack_propagate(False)
     global_sidept_currpage = pagename
 
-
 def change_mainpt_page(pagename):
     global welcomepage, editpage
     mainpt_pages = {'spare': welcomepage, 'file': welcomepage, 'code': editpage,
@@ -177,7 +174,6 @@ def change_mainpt_page(pagename):
     mainpt_pages[pagename].pack(fill=tk.BOTH, expand=True)
     mainpt_pages[pagename].pack_propagate(False)
     global_mainpt_currpage = pagename
-
 
 def about():
     global global_ver, about_updtxt, global_server_addr, global_about_useslist
@@ -242,7 +238,6 @@ def about():
         about_updtxt['text'] = '暂时无法检查更新'
     aboutwin.mainloop()
 
-
 def scan_class():
     # print('Scanning Class...')
     try:
@@ -254,19 +249,16 @@ def scan_class():
         print(e)
         msgbox.showerror("错误", "请先选择一个文件！\n\n详细错误信息请见Console。")
 
-
 def create_new_class(): # BUG: 无法添加新的列表项
     ask = ui.Dialog(root, "创建新类", ["新类名", "继承名"], btntext="确定")
     ask.mainloop()
     classlist.insert("end", ask.combine_entries()[1])
-
 
 def del_sel_class():
     sel = classlist.curselection()
     for i in sel:
         print(classlist.get(i))
         classlist.delete(i)
-
 
 def submit_server_addr(ip_enter, port_enter, askwin=None):
     global global_server_addr
@@ -287,7 +279,6 @@ def submit_server_addr(ip_enter, port_enter, askwin=None):
     else:
         msgbox.showerror('输入信息无效', '指定的服务器配置信息无效\n请编辑确认后再次提交')
 
-
 def ask_server_addr(root_win=None):
     askaddr_win = tk.Toplevel()
     if root_win != None:
@@ -307,7 +298,6 @@ def ask_server_addr(root_win=None):
     askaddr_win.geometry('300x'+str(askaddr_win.winfo_height()))
     askaddr_win.resizable(0, 0)
     askaddr_win.mainloop()
-
 
 def change_file(selection: str):
     # 在边栏文件列表中切换文件时执行
@@ -330,7 +320,6 @@ def change_file(selection: str):
             btn.disable()
             # print(btn.disablefg,btn.fg
 
-
 def open_code(selection):
     # 读取所选的文件 加载代码
     file_path = selection['values'][0]
@@ -344,13 +333,11 @@ def open_code(selection):
     global_file.append(file_path)
     pf.close()
 
-
 def save_code():
     data = code.get("1.0", "end")
     filename = fd.asksaveasfilename()
     with open(filename, 'w', encoding="utf-8") as sf:
         sf.write(data)
-
 
 def find_classes_in_file(filename):
     print("Scanning for and listing classes...")
@@ -361,6 +348,23 @@ def find_classes_in_file(filename):
         if isinstance(item, ast.ClassDef):
             class_names.append(item.name)
     return class_names
+
+def upd_greeting():
+    global about_txt
+    #print(about_txt)
+    print("Getting greetings subscription")
+    try:
+        res=get_fr_server({"func":"greetings.get"})
+        if not res['exists']:
+            return None
+        else:
+            print("Greeting detected: "+str(res['msg']))
+            #about_txt.text='v'+str(global_ver)+' | '+str(res['msg'])
+            about_txt['text']='v'+str(global_ver)+' | '+str(res['msg'])
+            #about_txt.reprop()
+    except:
+        #mkerr=abc #取消注释本行产生错误，查看详细报错
+        return None
 
 
 # Things in console #
@@ -466,8 +470,8 @@ statustxt.pack(fill=tk.BOTH, expand=True)
 statuspt.pack(side=tk.LEFT, fill=tk.Y)
 statuspt.pack_propagate(False)
 
-about_txt = tk.Button(btmbar, text='Python Visual Programmer v'+global_ver, bg='#1e1e1e',
-                      fg='#ffffff', bd=0, font=('微软雅黑', 7), command=about).pack(side=tk.RIGHT, fill=tk.Y)
+about_txt = tk.Button(btmbar, text='Python Visual Programmer v'+global_ver, bg='#1e1e1e',fg='#ffffff', 
+                          relief='flat', bd=0, command=about).pack(side=tk.RIGHT, fill=tk.Y)
 
 view_switch = tk.Frame(btmbar)
 view_btns = [ui.FlatButton(view_switch, '顺序视图', bg='#1e1e1e', fg='#ffffff', floatingbg='lighter', floatingfg='nochange', disablefg='darker'),
@@ -525,6 +529,9 @@ if global_server_addr == 'ask':
 
 main_file_viewer.sync_t.start()
 
-root.protocol("WM_DELETE_WINDOW", lambda: os._exit(1))  # 防止主进程没杀死的问题
+root.protocol("WM_DELETE_WINDOW", lambda: os._exit(1))  # 防止主进程没杀死的问题（感谢CodeCrafter修了一个历经半年我都懒得修的bug ——rgzz666）
+
+upd_greeting_t=threading.Thread(target=upd_greeting)
+upd_greeting_t.start()
 
 root.mainloop()

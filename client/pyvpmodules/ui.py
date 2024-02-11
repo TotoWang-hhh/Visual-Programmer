@@ -5,12 +5,12 @@ import tkinter.ttk as ttk
 import tkinter.filedialog as filebox
 from tkinter import *
 import os
-import sys
+#import sys
 # import pyautogui
 import time
 import threading
 import tttk
-import traceback
+import warnings
 
 currcwd = os.getcwd()
 os.chdir(os.path.split(os.path.realpath(__file__))[0])
@@ -260,6 +260,7 @@ class FlatButton(tk.Label):
         self.image = image
         self.bg = bg
         self.fg = fg
+        self.command=command
         if floatingbg.lower() == 'darker':
             self.floatingbg = self.calc_color(self.bg, 'darker', level=1)
         elif floatingbg.lower() == 'nochange':
@@ -360,6 +361,8 @@ class FlatButton(tk.Label):
         # self.__init__()
         self['bg'] = self.bg
         self['fg'] = self.fg
+        #self['command']=self.command
+        self['text']=self.text
 
 
 class AnimatedButton(FlatButton):  # 请勿大规模使用AnimatedButton()，防止卡顿或bug泛滥
