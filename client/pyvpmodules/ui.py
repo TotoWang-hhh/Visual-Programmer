@@ -491,7 +491,6 @@ class AnimatedButton(FlatButton):  # 请勿大规模使用AnimatedButton()，防
 
 
 class Dialog(tk.Toplevel):
-
     '''对话框
 
     >>> root = Tk() # 必须的
@@ -500,7 +499,6 @@ class Dialog(tk.Toplevel):
     >>> root.mainloop()
 
     '''
-
     def __init__(self,
                  parent,  # type: tk.Tk
                  title="Dialog",  # type: str
@@ -519,10 +517,9 @@ class Dialog(tk.Toplevel):
             tip.pack()
             self.tip_entries.append(tip)  # 将TipEnter控件添加到tip_entries列表中
 
-        self.combine_button = tk.Button(
+        self.combine_button = FlatButton(
             self, text=btntext, command=self.combine_entries and self.destroy)
-
-        self.combine_button.pack(side="left", padx=5, pady=5)
+        self.combine_button.pack(fill=tk.X, padx=20, pady=5)
 
         self.transient(parent)
         self.call = self.callerror
@@ -531,7 +528,6 @@ class Dialog(tk.Toplevel):
             self.call(
                 "The number of textlist lists cannot be greater than the tipint parameter"
             )
-
     def combine_entries(self) -> list:
         entries_list = [entry.get() for entry in self.tip_entries]
         # print('用户填写：' + str(entries_list))
