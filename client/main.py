@@ -93,18 +93,6 @@ for imgpil in sidebarbtmimgpil:
 icon96_pil = icon_pil.resize((96, 96))
 icon96_tk = ImageTk.PhotoImage(image=icon96_pil)
 
-# 准备完成后的拖延时间
-for i in range(0, 20):
-    startwin.update()
-    time.sleep(0.1)
-# 出场动画
-for i in range(0, 10):
-    startwin.wm_attributes('-alpha', 1-i/10)
-    startwin.update()
-    time.sleep(0.05)
-startwin.update()
-startwin.destroy()
-
 
 # 类与函数
 def launch(funcid):
@@ -360,11 +348,31 @@ def upd_greeting():
         else:
             print("Greeting detected: "+str(res['msg']))
             #about_txt.text='v'+str(global_ver)+' | '+str(res['msg'])
-            about_txt['text']='v'+str(global_ver)+' | '+str(res['msg'])
+            return str(res['msg'])
             #about_txt.reprop()
     except:
         #mkerr=abc #取消注释本行产生错误，查看详细报错
+        print("[upd_greeting] Failed to connect to server")
         return None
+
+
+greeting=upd_greeting()
+vertxt='Python Visual Programmer v'+global_ver
+if greeting!=None:
+    vertxt='v'+str(global_ver)+' | '+str(greeting)
+
+
+# 准备完成后的拖延时间
+for i in range(0, 20):
+    startwin.update()
+    time.sleep(0.1)
+# 出场动画
+for i in range(0, 10):
+    startwin.wm_attributes('-alpha', 1-i/10)
+    startwin.update()
+    time.sleep(0.05)
+startwin.update()
+startwin.destroy()
 
 
 # Things in console #
@@ -381,9 +389,9 @@ root.title('Python Visual Programmer')
 root.iconbitmap("./icon.ico")
 root.configure(background='#cccccc')
 root.minsize(640, 360)
-root.geometry(size=(800, 540))
+root.geometry(size=(800, 540)) #此处geometry写法仅适用于tkt.Tk()
+root.protocol("WM_DELETE_WINDOW", lambda: os._exit(1))  # 防止主进程没杀死的问题（感谢CodeCrafter修了一个历经半年我都懒得修的bug ——rgzz666）
 
-# py_win_style.apply_style(root,'aero')
 
 btmbar = tk.Frame(root, bg='#1e1e1e', height=24)
 btmbar.pack(side=tk.BOTTOM, fill=tk.X)
@@ -470,7 +478,7 @@ statustxt.pack(fill=tk.BOTH, expand=True)
 statuspt.pack(side=tk.LEFT, fill=tk.Y)
 statuspt.pack_propagate(False)
 
-about_txt = tk.Button(btmbar, text='Python Visual Programmer v'+global_ver, bg='#1e1e1e',fg='#ffffff', 
+about_txt = tk.Button(btmbar, text=vertxt, bg='#1e1e1e',fg='#ffffff', 
                           relief='flat', bd=0, command=about).pack(side=tk.RIGHT, fill=tk.Y)
 
 view_switch = tk.Frame(btmbar)
@@ -529,9 +537,5 @@ if global_server_addr == 'ask':
 
 main_file_viewer.sync_t.start()
 
-root.protocol("WM_DELETE_WINDOW", lambda: os._exit(1))  # 防止主进程没杀死的问题（感谢CodeCrafter修了一个历经半年我都懒得修的bug ——rgzz666）
-
-upd_greeting_t=threading.Thread(target=upd_greeting)
-upd_greeting_t.start()
 
 root.mainloop()
