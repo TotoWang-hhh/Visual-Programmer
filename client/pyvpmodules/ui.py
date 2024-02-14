@@ -1,16 +1,21 @@
-# -*- coding: utf-8 -*-
+"""
+pyvpmodules.ui
 
-import tkinter as tk
-import tkinter.ttk as ttk
-import tkinter.filedialog as filebox
-from tkinter import *
+This file contains several ui components which have been used in PyVP.
+"""
+
 import os
-#import sys
+import threading
+# import sys
 # import pyautogui
 import time
-import threading
-import tttk
+import tkinter as tk
+import tkinter.filedialog as filebox
+import tkinter.ttk as ttk
 import warnings
+from tkinter import *
+
+import tttk
 
 currcwd = os.getcwd()
 os.chdir(os.path.split(os.path.realpath(__file__))[0])
@@ -260,7 +265,7 @@ class FlatButton(tk.Label):
         self.image = image
         self.bg = bg
         self.fg = fg
-        self.command=command
+        self.command = command
         if floatingbg.lower() == 'darker':
             self.floatingbg = self.calc_color(self.bg, 'darker', level=1)
         elif floatingbg.lower() == 'nochange':
@@ -361,8 +366,8 @@ class FlatButton(tk.Label):
         # self.__init__()
         self['bg'] = self.bg
         self['fg'] = self.fg
-        #self['command']=self.command
-        self['text']=self.text
+        # self['command']=self.command
+        self['text'] = self.text
 
 
 class AnimatedButton(FlatButton):  # 请勿大规模使用AnimatedButton()，防止卡顿或bug泛滥
@@ -502,8 +507,10 @@ class Dialog(tk.Toplevel):
     >>> root.mainloop()
 
     '''
+
     def __init__(self,
                  parent,  # type: tk.Tk
+                 *,
                  title="Dialog",  # type: str
                  textlist=[],  # type: list
                  btntext="OK",  # type: str
@@ -514,6 +521,7 @@ class Dialog(tk.Toplevel):
         self.title(title)
 
         self.tip_entries = []  # 存储TipEnter控件的列表
+        self.mainlist = []
 
         for i in range(tipint):
             tip = tttk.TipEnter(self, text=textlist[i])
@@ -521,7 +529,7 @@ class Dialog(tk.Toplevel):
             self.tip_entries.append(tip)  # 将TipEnter控件添加到tip_entries列表中
 
         self.combine_button = FlatButton(
-            self, text=btntext, command=self.combine_entries and self.destroy)
+            self, text=btntext, command=self.getlist)
         self.combine_button.pack(fill=tk.X, padx=20, pady=5)
 
         self.transient(parent)
@@ -531,13 +539,16 @@ class Dialog(tk.Toplevel):
             self.call(
                 "The number of textlist lists cannot be greater than the tipint parameter"
             )
-    def combine_entries(self) -> list:
-        entries_list = [entry.get() for entry in self.tip_entries]
-        # print('用户填写：' + str(entries_list))
-        return entries_list
+
+        self.mainloop()
 
     def callerror(self, info):
         raise SyntaxError(info)
+
+    def getlist(self):
+        self.mainlist = [entry.get() for entry in self.tip_entries]
+        self.destroy()
+        return self.mainlist
 
 
 os.chdir(currcwd)

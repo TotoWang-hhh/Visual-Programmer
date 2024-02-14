@@ -1,32 +1,42 @@
-# Python Visual Programmer
-# 2023 By 小康2022 & 真_人工智障
-# v0.1.0
+"""
+Main file
 
-import tkinter as tk
-import tkinter.ttk as ttk
-import tkintertools as tkt
-import tttk
-import tkinter.messagebox as msgbox
-import tkinter.simpledialog as sd
-import tkinter.filedialog as fd
+2023 By 小康2022 & 真_人工智障 & CodeCrafter
+"""
 
-import os
-import sys
-import time
-import threading
-#import math
-
-import pyvpmodules.ui as ui
-import pyvpmodules.clipboard as clipboard
-import pyvpmodules.editor as editor
-
-from PIL import ImageTk, Image
-#import pyclip
-import webbrowser
-import socket
-import json
-import warnings
 import ast
+import json
+import math
+import os
+import socket
+import sys
+import threading
+import time
+import tkinter as tk
+import warnings
+import webbrowser
+from tkinter import filedialog as fd
+from tkinter import messagebox as msgbox
+from tkinter import ttk as ttk
+
+import pyclip
+import pyvpmodules.clipboard as clipboard
+import pyvpmodules.ui as ui
+import tkintertools_dev as tkt
+import tttk
+from PIL import Image, ImageTk
+
+__VERSION__ = "0.1.0"
+
+
+class Application:
+    """应用程序主体"""
+
+    root = tkt.Tk(title='Python Visual Programer')
+    root.withdraw()
+
+    def __init__(self) -> None:
+        pass
 
 
 # 全局变量
@@ -42,9 +52,6 @@ print(os.getcwd())
 # os.chdir(sys.argv[0])
 
 pyvpclipboard = clipboard.Clipboard()
-
-root = tkt.Tk()
-root.withdraw()
 
 # 浅做一个启动界面
 startwin = tk.Toplevel()
@@ -132,6 +139,7 @@ def launch(funcid):
             msgbox.showerror(
                 '错误', 'launch()没有根据给定的id找到相应的函数\n出错id层级: '+funcid_splited[0])
 
+
 def get_fr_server(send_data):
     global global_server_addr
     skt = socket.socket()
@@ -143,6 +151,7 @@ def get_fr_server(send_data):
     skt.close()
     return res
 
+
 def change_sidept_page(pagename):
     global fileframe, resframe, functionframe, classframe, moduleframe
     sidept_pages = {'file': fileframe, 'code': resframe,
@@ -152,6 +161,7 @@ def change_sidept_page(pagename):
     sidept_pages[pagename].pack(fill=tk.BOTH, expand=True)
     sidept_pages[pagename].pack_propagate(False)
     global_sidept_currpage = pagename
+
 
 def change_mainpt_page(pagename):
     global welcomepage, editpage
@@ -163,11 +173,12 @@ def change_mainpt_page(pagename):
     mainpt_pages[pagename].pack_propagate(False)
     global_mainpt_currpage = pagename
 
+
 def about():
     global global_ver, about_updtxt, global_server_addr, global_about_useslist
     aboutwin = tk.Toplevel()
     aboutwin.title('关于PyVP')
-    aboutwin.transient(root)
+    aboutwin.transient(Application.root)
     aboutwin.configure(background='#ffffff')
     # ui.blur_window_background(aboutwin)
     about_pt = tk.Frame(aboutwin, bg='#ffffff')
@@ -226,10 +237,12 @@ def about():
         about_updtxt['text'] = '暂时无法检查更新'
     aboutwin.mainloop()
 
+
 def scan_class():
     # print('Scanning Class...')
     try:
-        classes = find_classes_in_file(global_file[0]) # BUG: 当切换文件时无法切换索引
+        classes = find_classes_in_file(global_file[0])
+        classlist.delete(1, tk.END)
         for names in classes:
             classlist.insert('end', names)
         # classlist.pack(fill='both', expand=True)
@@ -237,16 +250,19 @@ def scan_class():
         print(e)
         msgbox.showerror("错误", "请先选择一个文件！\n\n详细错误信息请见Console。")
 
-def create_new_class(): # BUG: 无法添加新的列表项
-    ask = ui.Dialog(root, "创建新类", ["新类名", "继承名"], btntext="确定")
-    ask.mainloop()
-    classlist.insert("end", ask.combine_entries()[1])
+
+def create_new_class():  # BUG: 无法添加新的列表项
+    ask = ui.Dialog(Application.root, title="创建新类",
+                    textlist=["新类名", "继承名"], btntext="确定")
+    print(ask.mainlist)
+
 
 def del_sel_class():
     sel = classlist.curselection()
     for i in sel:
         print(classlist.get(i))
         classlist.delete(i)
+
 
 def submit_server_addr(ip_enter, port_enter, askwin=None):
     global global_server_addr
@@ -267,6 +283,7 @@ def submit_server_addr(ip_enter, port_enter, askwin=None):
     else:
         msgbox.showerror('输入信息无效', '指定的服务器配置信息无效\n请编辑确认后再次提交')
 
+
 def ask_server_addr(root_win=None):
     askaddr_win = tk.Toplevel()
     if root_win != None:
@@ -286,6 +303,7 @@ def ask_server_addr(root_win=None):
     askaddr_win.geometry('300x'+str(askaddr_win.winfo_height()))
     askaddr_win.resizable(0, 0)
     askaddr_win.mainloop()
+
 
 def change_file(selection: str):
     # 在边栏文件列表中切换文件时执行
@@ -308,6 +326,7 @@ def change_file(selection: str):
             btn.disable()
             # print(btn.disablefg,btn.fg
 
+
 def open_code(selection):
     # 读取所选的文件 加载代码
     file_path = selection['values'][0]
@@ -321,45 +340,49 @@ def open_code(selection):
     global_file.append(file_path)
     pf.close()
 
+
 def save_code():
     data = code.get("1.0", "end")
     filename = fd.asksaveasfilename()
     with open(filename, 'w', encoding="utf-8") as sf:
         sf.write(data)
 
+
 def find_classes_in_file(filename):
     print("Scanning for and listing classes...")
     with open(filename, "r", encoding='utf-8') as file:
         node = ast.parse(file.read(), filename=filename)
     class_names = []
+    class_names.clear()
     for item in ast.walk(node):
         if isinstance(item, ast.ClassDef):
             class_names.append(item.name)
     return class_names
 
+
 def upd_greeting():
     global about_txt
-    #print(about_txt)
+    # print(about_txt)
     print("Getting greetings subscription")
     try:
-        res=get_fr_server({"func":"greetings.get"})
+        res = get_fr_server({"func": "greetings.get"})
         if not res['exists']:
             return None
         else:
             print("Greeting detected: "+str(res['msg']))
-            #about_txt.text='v'+str(global_ver)+' | '+str(res['msg'])
+            # about_txt.text='v'+str(global_ver)+' | '+str(res['msg'])
             return str(res['msg'])
-            #about_txt.reprop()
+            # about_txt.reprop()
     except:
-        #mkerr=abc #取消注释本行产生错误，查看详细报错
+        # mkerr=abc #取消注释本行产生错误，查看详细报错
         print("[upd_greeting] Failed to connect to server")
         return None
 
 
-greeting=upd_greeting()
-vertxt='Python Visual Programmer v'+global_ver
-if greeting!=None:
-    vertxt='v'+str(global_ver)+' | '+str(greeting)
+greeting = upd_greeting()
+vertxt = 'Python Visual Programmer v'+global_ver
+if greeting != None:
+    vertxt = 'v'+str(global_ver)+' | '+str(greeting)
 
 
 # 准备完成后的拖延时间
@@ -384,19 +407,20 @@ if not '--noclear' in sys.argv:
 
 
 # UI BELOW #
-root.deiconify()
-root.title('Python Visual Programmer')
-root.iconbitmap("./icon.ico")
-root.configure(background='#cccccc')
-root.minsize(640, 360)
-root.geometry(size=(800, 540)) #此处geometry写法仅适用于tkt.Tk()
-root.protocol("WM_DELETE_WINDOW", lambda: os._exit(1))  # 防止主进程没杀死的问题（感谢CodeCrafter修了一个历经半年我都懒得修的bug ——rgzz666）
+Application.root.deiconify()
+Application.root.title('Python Visual Programmer')
+Application.root.iconbitmap("./icon.ico")
+Application.root.configure(background='#cccccc')
+Application.root.minsize(640, 360)
+Application.root.geometry(size=(800, 540))  # 此处geometry写法仅适用于tkt.Tk()
+# 防止主进程没杀死的问题（感谢CodeCrafter-TL修了一个历经半年我都懒得修的bug ——rgzz666）
+# Application.root.protocol("WM_DELETE_WINDOW", lambda: Application.root.destroy())
 
 
-btmbar = tk.Frame(root, bg='#1e1e1e', height=24)
+btmbar = tk.Frame(Application.root, bg='#1e1e1e', height=24)
 btmbar.pack(side=tk.BOTTOM, fill=tk.X)
 
-sidebar = tk.Frame(root, bg='#1e1e1e', width=48)
+sidebar = tk.Frame(Application.root, bg='#1e1e1e', width=48)
 sidebar.pack(side=tk.LEFT, fill=tk.Y)
 sidebar.pack_propagate(False)
 
@@ -413,7 +437,7 @@ for img in sidebarbtmimg:
         'sidebarbtm.'+str(index))).pack(padx=2, pady=2, side=tk.BOTTOM)
     tmp_index += 1
 
-sidept = tk.Frame(root, bg='#ffffff', width=200)
+sidept = tk.Frame(Application.root, bg='#ffffff', width=200)
 
 global_sidept_currpage = 'file'
 global_mainpt_currpage = 'spare'
@@ -427,10 +451,10 @@ main_file_viewer.open_dir()
 
 fileframe.pack_propagate(False)
 
-file_rightclick_menu = tttk.Menu(root, {'剪切': lambda: pyvpclipboard.cut(main_file_viewer.tree.item(main_file_viewer.tree.focus())['values'][0], 'file'),
-                                        '复制': lambda: pyvpclipboard.copy(main_file_viewer.tree.item(main_file_viewer.tree.focus())['values'][0], 'file'),
-                                        '粘贴': lambda: pyvpclipboard.paste_at_file(main_file_viewer.get_focus_dir()),
-                                        '永久删除': lambda: print('del'), '重命名': lambda: print('rename')})
+file_rightclick_menu = tttk.Menu(Application.root, {'剪切': lambda: pyvpclipboard.cut(main_file_viewer.tree.item(main_file_viewer.tree.focus())['values'][0], 'file'),
+                                                    '复制': lambda: pyvpclipboard.copy(main_file_viewer.tree.item(main_file_viewer.tree.focus())['values'][0], 'file'),
+                                                    '粘贴': lambda: pyvpclipboard.paste_at_file(main_file_viewer.get_focus_dir()),
+                                                    '永久删除': lambda: print('del'), '重命名': lambda: print('rename')})
 main_file_viewer.tree.bind('<Button-3>', lambda event: file_rightclick_menu.show()
                            if len(main_file_viewer.tree.focus()) != 0 else None)
 # main_file_viewer.tree.bind(
@@ -478,8 +502,8 @@ statustxt.pack(fill=tk.BOTH, expand=True)
 statuspt.pack(side=tk.LEFT, fill=tk.Y)
 statuspt.pack_propagate(False)
 
-about_txt = tk.Button(btmbar, text=vertxt, bg='#1e1e1e',fg='#ffffff', 
-                          relief='flat', bd=0, command=about).pack(side=tk.RIGHT, fill=tk.Y)
+about_txt = tk.Button(btmbar, text=vertxt, bg='#1e1e1e', fg='#ffffff',
+                      relief='flat', bd=0, command=about).pack(side=tk.RIGHT, fill=tk.Y)
 
 view_switch = tk.Frame(btmbar)
 view_btns = [ui.FlatButton(view_switch, '顺序视图', bg='#1e1e1e', fg='#ffffff', floatingbg='lighter', floatingfg='nochange', disablefg='darker'),
@@ -488,11 +512,11 @@ for btn in view_btns:
     btn.pack(side=tk.LEFT, fill=tk.Y)
 view_switch.pack(side=tk.RIGHT, fill=tk.Y)
 
-root.update()
+Application.root.update()
 
 # 工作区
-# win=editor.Editor(root)
-win = tk.Frame(root)  # 左侧Frame
+# win=editor.Editor(Application.root)
+win = tk.Frame(Application.root)  # 左侧Frame
 win.pack(fill='both', expand=True)
 win.pack_propagate(False)
 
@@ -524,18 +548,23 @@ program_pt.pack(fill=tk.BOTH, expand=True)
 welcomepage.pack(fill=tk.BOTH, expand=True)
 
 
-print('root width   ', root.winfo_width())
+print('Application.root width   ', Application.root.winfo_width())
 print('sidebar width   ', sidebar['width'])
 print('sidept width   ', sidept['width'])
-print('canvas width   ', root.winfo_width()-sidebar['width']-sidept['width'])
+print('canvas width   ', Application.root.winfo_width() -
+      sidebar['width']-sidept['width'])
 
-root.update()
+Application.root.update()
 
 # 手动指定服务器
 if global_server_addr == 'ask':
-    ask_server_addr(root_win=root)
+    ask_server_addr(root_win=Application.root)
 
 main_file_viewer.sync_t.start()
 
 
-root.mainloop()
+Application.root.mainloop()
+exit(0)
+
+# 防止主进程没杀死的问题（感谢CodeCrafter-TL修了一个历经半年我都懒得修的bug ——rgzz666）
+# os._exit(1)

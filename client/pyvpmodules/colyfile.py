@@ -2,8 +2,9 @@
 # 仅在Windows下使用
 # 参考 https://xxmdmst.blog.csdn.net/article/details/120631425
 
-import win32clipboard
 from ctypes import *
+
+import win32clipboard
 
 
 class DROPFILES(Structure):
