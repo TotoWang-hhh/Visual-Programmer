@@ -17,19 +17,21 @@ from tkinter import filedialog as fd
 from tkinter import messagebox as msgbox
 from tkinter import ttk as ttk
 
-import pyvpmodules.clipboard as clipboard
-import pyvpmodules.ui as ui
-import tkintertools as tkt
 import tttk
 from PIL import Image, ImageTk
 
-__VERSION__ = "0.1.0"
+import pyvpmodules.clipboard as clipboard
+import pyvpmodules.ui as ui
+import tkintertools as tkt
+
+__version__ = "0.1.0"
 
 
 class Application:
     """应用程序主体"""
 
     root = tkt.Tk(title='Python Visual Programer')
+    root.theme(bordercolor='#0F0', captioncolor='#00F', titlecolor='#F00')
     root.withdraw()
 
     def __init__(self) -> None:
