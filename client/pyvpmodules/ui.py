@@ -557,9 +557,4 @@ class Dialog(tk.Toplevel):
         return self.mainlist
 
 
-def dialog_callback(lst, mainlist):
-    mainlist = lst
-    return mainlist
-
-
 os.chdir(currcwd)

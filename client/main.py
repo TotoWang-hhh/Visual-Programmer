@@ -6,11 +6,9 @@ Main file
 
 import ast
 import json
-import math
 import os
 import socket
 import sys
-import threading
 import time
 import tkinter as tk
 import warnings
@@ -19,10 +17,9 @@ from tkinter import filedialog as fd
 from tkinter import messagebox as msgbox
 from tkinter import ttk as ttk
 
-import pyclip
 import pyvpmodules.clipboard as clipboard
 import pyvpmodules.ui as ui
-import tkintertools_dev as tkt
+import tkintertools as tkt
 import tttk
 from PIL import Image, ImageTk
 
@@ -75,7 +72,7 @@ startwin.update()
 
 # 在这里写启动准备工作，时不时记得update()一下防止未响应
 # 加载界面中一定包含的图片图标等
-# 左边栏图像
+# Sidebar Image
 sidebarimgpil = []
 sidebarimg = []
 sidebarimgpil.append(Image.open("./img/sidebar/folder.png"))
@@ -87,7 +84,7 @@ sidebarimgpil.append(Image.open("./img/sidebar/modules.png"))
 for imgpil in sidebarimgpil:
     sidebarimg.append(ImageTk.PhotoImage(image=imgpil))
 
-# 左边栏图像
+# Sidebar Image
 sidebarbtmimgpil = []
 sidebarbtmimg = []
 sidebarbtmimgpil.append(Image.open("./img/sidebarbtm/more.png"))
@@ -96,12 +93,14 @@ sidebarbtmimgpil.append(Image.open("./img/sidebarbtm/run.png"))
 for imgpil in sidebarbtmimgpil:
     sidebarbtmimg.append(ImageTk.PhotoImage(image=imgpil))
 
-# 其他图像资源
+# Other Image
 icon96_pil = icon_pil.resize((96, 96))
 icon96_tk = ImageTk.PhotoImage(image=icon96_pil)
 
 
-# 类与函数
+# Class and Function
+
+
 def launch(funcid):
     '''Find and execute functions based on the passed in string'''
     funcid_splited = funcid.split('.')
@@ -140,70 +139,7 @@ def launch(funcid):
                 '错误', 'launch()没有根据给定的id找到相应的函数\n出错id层级: '+funcid_splited[0])
 
 
-def about():
-    """About PyVP"""
-    global global_ver, about_updtxt, global_server_addr, global_about_useslist
-    aboutwin = tk.Toplevel()
-    aboutwin.title('关于PyVP')
-    aboutwin.transient(Application.root)
-    aboutwin.configure(background='#ffffff')
-    # ui.blur_window_background(aboutwin)
-    about_pt = tk.Frame(aboutwin, bg='#ffffff')
-    icon128_pil = icon_pil.resize((128, 128))
-    icon128_tk = ImageTk.PhotoImage(image=icon128_pil)
-    tk.Label(about_pt, image=icon128_tk, bg='#ffffff').pack(side=tk.LEFT)
-    abouttxtpt = tk.Frame(about_pt, bg='#ffffff')
-    tk.Label(abouttxtpt, text='Python Visual Programmer',
-             bg='#ffffff', font=('微软雅黑', 20), anchor='w').pack()
-    aboutrowb = tk.Frame(abouttxtpt, bg='#ffffff')
-    tk.Label(aboutrowb, text='2023 By 小康2022 & 真_人工智障',
-             bg='#ffffff', anchor='w').pack(side=tk.LEFT)
-    tk.Label(aboutrowb, text='v'+global_ver, bg='#ffffff',
-             fg='#909090', anchor='e').pack(side=tk.RIGHT)
-    aboutrowb.pack(fill=tk.X)
-    ttk.Separator(abouttxtpt).pack(fill=tk.X, pady=10)
-    aboutrowc = tk.Frame(abouttxtpt, bg='#ffffff')
-    about_updtxt = tk.Label(aboutrowc, text='请等待版本检查就绪',
-                            bg='#ffffff', anchor='w')
-    about_updtxt.pack(side=tk.LEFT)
-    ui.AnimatedButton(aboutrowc, aboutwin, text='项目GitHub', bg='#cccccc', fg='#000000', floatingbg='#000000', floatingfg='#ffffff',
-                      command=lambda: webbrowser.open("https://github.com/xiaokang2022/visual-programmer")).pack(side=tk.RIGHT)
-    aboutrowc.pack(fill=tk.X)
-    uses_pt = tk.Frame(aboutwin, bg='#dddddd')
-    tk.Label(uses_pt, text='本项目使用', bg='#303030', fg='#ffffff').pack(fill=tk.X)
-    ulist_pt = tk.Frame(uses_pt, bg='#dddddd')
-    ulist_cola = tk.Frame(ulist_pt, bg='#dddddd')
-    ulist_colb = tk.Frame(ulist_pt, bg='#dddddd')
-    curr_col = 0
-    for proj in global_about_useslist.keys():
-        if curr_col == 0:
-            txt = tk.Label(ulist_cola, text=proj, bg='#dddddd', anchor='w')
-            curr_col = 1
-        elif curr_col == 1:
-            txt = tk.Label(ulist_colb, text=proj, bg='#dddddd', anchor='w')
-            curr_col = 0
-        else:
-            warnings.warn('Uses list packing failed')
-        txt.bind("<Button-1>", lambda event,
-                 url=global_about_useslist[proj]: webbrowser.open(url))
-        txt.pack(fill=tk.X)
-    ulist_cola.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-    ulist_colb.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
-    ulist_pt.pack(fill=tk.BOTH, expand=True)
-    about_pt.pack(fill=tk.X)
-    uses_pt.pack(fill=tk.X, padx=10, pady=10)
-    abouttxtpt.pack(fill=tk.BOTH, side=tk.RIGHT, padx=15)
-    aboutwin.update()
-    aboutwin.resizable(False, False)
-    try:
-        res = get_fr_server(
-            {"func": "ver.get_ifnewver", "clientver": global_ver})
-        # print(res)
-        about_updtxt['text'] = res['msg']
-    except:
-        about_updtxt['text'] = '暂时无法检查更新'
-    aboutwin.mainloop()
-
+### Server ###
 
 def get_fr_server(send_data):
     """Connect to server"""
@@ -280,6 +216,73 @@ def upd_greeting():
         print("[upd_greeting] Failed to connect to server")
         return None
 
+### UI ###
+
+
+def about():
+    """About PyVP"""
+    global global_ver, about_updtxt, global_server_addr, global_about_useslist
+    aboutwin = tk.Toplevel()
+    aboutwin.title('关于PyVP')
+    aboutwin.transient(Application.root)
+    aboutwin.configure(background='#ffffff')
+    # ui.blur_window_background(aboutwin)
+    about_pt = tk.Frame(aboutwin, bg='#ffffff')
+    icon128_pil = icon_pil.resize((128, 128))
+    icon128_tk = ImageTk.PhotoImage(image=icon128_pil)
+    tk.Label(about_pt, image=icon128_tk, bg='#ffffff').pack(side=tk.LEFT)
+    abouttxtpt = tk.Frame(about_pt, bg='#ffffff')
+    tk.Label(abouttxtpt, text='Python Visual Programmer',
+             bg='#ffffff', font=('微软雅黑', 20), anchor='w').pack()
+    aboutrowb = tk.Frame(abouttxtpt, bg='#ffffff')
+    tk.Label(aboutrowb, text='2023 By 小康2022 & 真_人工智障',
+             bg='#ffffff', anchor='w').pack(side=tk.LEFT)
+    tk.Label(aboutrowb, text='v'+global_ver, bg='#ffffff',
+             fg='#909090', anchor='e').pack(side=tk.RIGHT)
+    aboutrowb.pack(fill=tk.X)
+    ttk.Separator(abouttxtpt).pack(fill=tk.X, pady=10)
+    aboutrowc = tk.Frame(abouttxtpt, bg='#ffffff')
+    about_updtxt = tk.Label(aboutrowc, text='请等待版本检查就绪',
+                            bg='#ffffff', anchor='w')
+    about_updtxt.pack(side=tk.LEFT)
+    ui.AnimatedButton(aboutrowc, aboutwin, text='项目GitHub', bg='#cccccc', fg='#000000', floatingbg='#000000', floatingfg='#ffffff',
+                      command=lambda: webbrowser.open("https://github.com/xiaokang2022/visual-programmer")).pack(side=tk.RIGHT)
+    aboutrowc.pack(fill=tk.X)
+    uses_pt = tk.Frame(aboutwin, bg='#dddddd')
+    tk.Label(uses_pt, text='本项目使用', bg='#303030', fg='#ffffff').pack(fill=tk.X)
+    ulist_pt = tk.Frame(uses_pt, bg='#dddddd')
+    ulist_cola = tk.Frame(ulist_pt, bg='#dddddd')
+    ulist_colb = tk.Frame(ulist_pt, bg='#dddddd')
+    curr_col = 0
+    for proj in global_about_useslist.keys():
+        if curr_col == 0:
+            txt = tk.Label(ulist_cola, text=proj, bg='#dddddd', anchor='w')
+            curr_col = 1
+        elif curr_col == 1:
+            txt = tk.Label(ulist_colb, text=proj, bg='#dddddd', anchor='w')
+            curr_col = 0
+        else:
+            warnings.warn('Uses list packing failed')
+        txt.bind("<Button-1>", lambda event,
+                 url=global_about_useslist[proj]: webbrowser.open(url))
+        txt.pack(fill=tk.X)
+    ulist_cola.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    ulist_colb.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+    ulist_pt.pack(fill=tk.BOTH, expand=True)
+    about_pt.pack(fill=tk.X)
+    uses_pt.pack(fill=tk.X, padx=10, pady=10)
+    abouttxtpt.pack(fill=tk.BOTH, side=tk.RIGHT, padx=15)
+    aboutwin.update()
+    aboutwin.resizable(False, False)
+    try:
+        res = get_fr_server(
+            {"func": "ver.get_ifnewver", "clientver": global_ver})
+        # print(res)
+        about_updtxt['text'] = res['msg']
+    except:
+        about_updtxt['text'] = '暂时无法检查更新'
+    aboutwin.mainloop()
+
 
 def change_sidept_page(pagename):
     """Change the sidebar according to the selected interface"""
@@ -304,6 +307,8 @@ def change_mainpt_page(pagename):
     mainpt_pages[pagename].pack_propagate(False)
     global_mainpt_currpage = pagename
 
+### File ###
+
 
 def change_file(selection: str):
     """Switch files in the sidebar file list"""
@@ -319,8 +324,9 @@ def change_file(selection: str):
             btn.enable()
         # 加载文件代码
         open_code(selection)
-        # 读取文件内的类
+        # 读取文件内的类和函数
         scan_class()
+        scan_func()
     else:
         for btn in view_btns:
             btn.disable()
@@ -337,6 +343,7 @@ def open_code(selection):
     else:
         code.delete('1.0', tk.END)
         code.insert(tk.END, data)
+    global_file.clear()
     global_file.append(file_path)
     pf.close()
 
@@ -348,13 +355,15 @@ def save_code():
     with open(filename, 'w', encoding="utf-8") as sf:
         sf.write(data)
 
+### Class ###
+
 
 def scan_class():
     """Use the find_classes_infile function to search for classes within the specified file and insert them into the list."""
     # print('Scanning Class...')
     try:
+        classlist.delete(0, "end")
         classes = find_classes_in_file(global_file[0])
-        classlist.delete(1, tk.END)
         for names in classes:
             classlist.insert('end', names)
         # classlist.pack(fill='both', expand=True)
@@ -371,10 +380,10 @@ def create_new_class():
         several properties.
     """
     ask = ui.Dialog(Application.root, title="创建新类",
-                    textlist=["新类名", "继承名"], btntext="确定", callback=handle_input)
+                    textlist=["新类名", "继承名"], btntext="确定", callback=handle_input_class)
 
 
-def handle_input(lst):
+def handle_input_class(lst):
     """Insert the content entered in the Create New Class dialog box into the list"""
     if lst:
         class_name, inherit_name = lst
@@ -400,6 +409,74 @@ def find_classes_in_file(filename):
         if isinstance(item, ast.ClassDef):
             class_names.append(item.name)
     return class_names
+
+### Function ###
+
+
+def scan_func():
+    try:
+        funclist.delete(0, "end")
+        functions = get_functions(global_file[0])
+        for func in functions:
+            funclist.insert("end", func['name'])
+    except IndexError as e:
+        print(e)
+        msgbox.showerror("错误", "请先选择一个文件！\n\n详细错误信息请见Console。")
+
+
+def create_new_func():
+    ask = ui.Dialog(Application.root, title="创建新函数", textlist=[
+                    '函数名', '参数个数'], btntext="确定", callback=lambda lst: handle_input_func(lst, int(lst[1])))
+
+
+def del_sel_func():
+    """Delete selected function"""
+    sel = funclist.curselection()
+    for i in sel:
+        print(funclist.get(i))
+        funclist.delete(i)
+
+
+def handle_input_func(lst, pm):
+    pmlist = []  # 创建空列表
+    if pm:
+        for i in range(pm+1):
+            pmlist.append(f"参数{i}")  # 将参数名称字符串添加到列表中
+
+        askpm = ui.Dialog(Application.root, title="添加参数",
+                          textlist=pmlist, tipint=pm+1, btntext="完成", callback=None)
+    else:
+        if lst:
+            func_name, inherit_name = lst
+            funclist.insert("end", f"{func_name}({inherit_name})")
+
+
+def get_functions(filename):
+    with open(filename, 'r', encoding='utf-8') as file:
+        code = file.read()
+
+    tree = ast.parse(code)
+    functions = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef):
+            function_name = node.name
+            class_name = None
+
+            # 查找所属类
+            for stmt in ast.walk(tree):
+                if isinstance(stmt, ast.ClassDef) and any(func == node for func in ast.walk(stmt)):
+                    class_name = stmt.name
+                    break
+
+            if class_name is not None:
+                function_name = f"{class_name}.{function_name}"  # 添加类名
+
+            function_lines = ast.get_source_segment(
+                code, node).strip().split('\n')[1:]
+            functions.append({'name': function_name, 'lines': function_lines})
+
+    return functions
 
 
 greeting = upd_greeting()
@@ -490,6 +567,17 @@ resframe.pack_propagate(False)
 
 functionframe = tk.Frame(sidept, width=200, bg='#ffffff')
 tk.Label(functionframe, text='函数', bg='#ffffff', anchor=tk.W).pack(fill=tk.X)
+funclist = tk.Listbox(functionframe, bg='#ffffff',
+                      relief='flat', bd=0, selectmode=tk.SINGLE)
+funclist.pack(fill='both', expand=True)
+bottombar_func = tk.Frame(functionframe, bg='#eeeeee', height=20)
+bottombar_func.pack(fill=tk.X, side='bottom')
+newfunc = ui.FlatButton(
+    bottombar_func, text='新函数', bg='#eeeeee', fg='#000000', command=create_new_func)
+newfunc.pack(side='left', fill='x', expand=True)
+delsel_func = ui.FlatButton(
+    bottombar_func, text='移除选中', bg='#eeeeee', fg='#000000', command=del_sel_func)
+delsel_func.pack(side='right', fill='x', expand=True)
 
 functionframe.pack_propagate(False)
 
@@ -499,14 +587,14 @@ tk.Label(classframe, text='本文件中的类', bg='#ffffff', anchor=tk.W).pack(
 classlist = tk.Listbox(classframe, bg='#ffffff',
                        relief='flat', bd=0, selectmode=tk.SINGLE)
 classlist.pack(fill='both', expand=True)
-bottombar = tk.Frame(classframe, bg='#eeeeee', height=20)
-bottombar.pack(fill=tk.X, side='bottom')
+bottombar_class = tk.Frame(classframe, bg='#eeeeee', height=20)
+bottombar_class.pack(fill=tk.X, side='bottom')
 newclass = ui.FlatButton(
-    bottombar, text='新类', bg='#eeeeee', fg='#000000', command=create_new_class)
+    bottombar_class, text='新类', bg='#eeeeee', fg='#000000', command=create_new_class)
 newclass.pack(side='left', fill='x', expand=True)
-delsel = ui.FlatButton(
-    bottombar, text='移除选中', bg='#eeeeee', fg='#000000', command=del_sel_class)
-delsel.pack(side='right', fill='x', expand=True)
+delsel_cls = ui.FlatButton(
+    bottombar_class, text='移除选中', bg='#eeeeee', fg='#000000', command=del_sel_class)
+delsel_cls.pack(side='right', fill='x', expand=True)
 
 classframe.pack_propagate(False)
 
