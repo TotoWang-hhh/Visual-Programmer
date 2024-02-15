@@ -514,7 +514,8 @@ class Dialog(tk.Toplevel):
                  title="Dialog",  # type: str
                  textlist=[],  # type: list
                  btntext="OK",  # type: str
-                 tipint=2  # type: int
+                 tipint=2,  # type: int
+                 callback=None  # type: function | None
                  ) -> None:
         tk.Toplevel.__init__(self)
 
@@ -522,6 +523,7 @@ class Dialog(tk.Toplevel):
 
         self.tip_entries = []  # 存储TipEnter控件的列表
         self.mainlist = []
+        self.callback = callback
 
         for i in range(tipint):
             tip = tttk.TipEnter(self, text=textlist[i])
@@ -540,6 +542,8 @@ class Dialog(tk.Toplevel):
                 "The number of textlist lists cannot be greater than the tipint parameter"
             )
 
+        self.wm_protocol("WM_DELETE_WINDOW", self.getlist)
+
         self.mainloop()
 
     def callerror(self, info):
@@ -547,8 +551,15 @@ class Dialog(tk.Toplevel):
 
     def getlist(self):
         self.mainlist = [entry.get() for entry in self.tip_entries]
+        if self.callback is not None:
+            self.callback(self.mainlist)  # 调用回调函数，传递mainlist
         self.destroy()
         return self.mainlist
+
+
+def dialog_callback(lst, mainlist):
+    mainlist = lst
+    return mainlist
 
 
 os.chdir(currcwd)

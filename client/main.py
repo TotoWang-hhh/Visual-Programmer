@@ -1,7 +1,7 @@
 """
 Main file
 
-2023 By 小康2022 & 真_人工智障 & CodeCrafter
+2023 By 小康2022 & 真_人工智障 & CodeCrafter-TL
 """
 
 import ast
@@ -103,7 +103,7 @@ icon96_tk = ImageTk.PhotoImage(image=icon96_pil)
 
 # 类与函数
 def launch(funcid):
-    '''根据传入的字符串找到并执行函数'''
+    '''Find and execute functions based on the passed in string'''
     funcid_splited = funcid.split('.')
     match funcid_splited[0]:
         case 'sidebar':  # 侧边栏按钮
@@ -140,41 +140,8 @@ def launch(funcid):
                 '错误', 'launch()没有根据给定的id找到相应的函数\n出错id层级: '+funcid_splited[0])
 
 
-def get_fr_server(send_data):
-    global global_server_addr
-    skt = socket.socket()
-    print('[get_fr_server()] Connecting to server...')
-    skt.connect(global_server_addr)
-    skt.send(json.dumps(send_data).encode('utf-8'))
-    print('[get_fr_server()] Waiting for response from server...')
-    res = json.loads(skt.recv(1024).decode('utf-8'))
-    skt.close()
-    return res
-
-
-def change_sidept_page(pagename):
-    global fileframe, resframe, functionframe, classframe, moduleframe
-    sidept_pages = {'file': fileframe, 'code': resframe,
-                    'func': functionframe, 'class': classframe, 'modules': moduleframe}
-    global global_sidept_currpage
-    sidept_pages[global_sidept_currpage].pack_forget()
-    sidept_pages[pagename].pack(fill=tk.BOTH, expand=True)
-    sidept_pages[pagename].pack_propagate(False)
-    global_sidept_currpage = pagename
-
-
-def change_mainpt_page(pagename):
-    global welcomepage, editpage
-    mainpt_pages = {'spare': welcomepage, 'file': welcomepage, 'code': editpage,
-                    'func': welcomepage, 'class': welcomepage, 'modules': welcomepage}
-    global global_mainpt_currpage
-    mainpt_pages[global_mainpt_currpage].pack_forget()
-    mainpt_pages[pagename].pack(fill=tk.BOTH, expand=True)
-    mainpt_pages[pagename].pack_propagate(False)
-    global_mainpt_currpage = pagename
-
-
 def about():
+    """About PyVP"""
     global global_ver, about_updtxt, global_server_addr, global_about_useslist
     aboutwin = tk.Toplevel()
     aboutwin.title('关于PyVP')
@@ -238,33 +205,21 @@ def about():
     aboutwin.mainloop()
 
 
-def scan_class():
-    # print('Scanning Class...')
-    try:
-        classes = find_classes_in_file(global_file[0])
-        classlist.delete(1, tk.END)
-        for names in classes:
-            classlist.insert('end', names)
-        # classlist.pack(fill='both', expand=True)
-    except IndexError as e:
-        print(e)
-        msgbox.showerror("错误", "请先选择一个文件！\n\n详细错误信息请见Console。")
-
-
-def create_new_class():  # BUG: 无法添加新的列表项
-    ask = ui.Dialog(Application.root, title="创建新类",
-                    textlist=["新类名", "继承名"], btntext="确定")
-    print(ask.mainlist)
-
-
-def del_sel_class():
-    sel = classlist.curselection()
-    for i in sel:
-        print(classlist.get(i))
-        classlist.delete(i)
+def get_fr_server(send_data):
+    """Connect to server"""
+    global global_server_addr
+    skt = socket.socket()
+    print('[get_fr_server()] Connecting to server...')
+    skt.connect(global_server_addr)
+    skt.send(json.dumps(send_data).encode('utf-8'))
+    print('[get_fr_server()] Waiting for response from server...')
+    res = json.loads(skt.recv(1024).decode('utf-8'))
+    skt.close()
+    return res
 
 
 def submit_server_addr(ip_enter, port_enter, askwin=None):
+    """Submit server information"""
     global global_server_addr
     isvalid = True
     # for pt in ip_enter.get().split('.'):
@@ -285,6 +240,7 @@ def submit_server_addr(ip_enter, port_enter, askwin=None):
 
 
 def ask_server_addr(root_win=None):
+    """Specify server"""
     askaddr_win = tk.Toplevel()
     if root_win != None:
         askaddr_win.transient(root_win)
@@ -305,8 +261,52 @@ def ask_server_addr(root_win=None):
     askaddr_win.mainloop()
 
 
+def upd_greeting():
+    """Receive subscription information"""
+    global about_txt
+    # print(about_txt)
+    print("Getting greetings subscription")
+    try:
+        res = get_fr_server({"func": "greetings.get"})
+        if not res['exists']:
+            return None
+        else:
+            print("Greeting detected: "+str(res['msg']))
+            # about_txt.text='v'+str(global_ver)+' | '+str(res['msg'])
+            return str(res['msg'])
+            # about_txt.reprop()
+    except:
+        # mkerr=abc #取消注释本行产生错误，查看详细报错
+        print("[upd_greeting] Failed to connect to server")
+        return None
+
+
+def change_sidept_page(pagename):
+    """Change the sidebar according to the selected interface"""
+    global fileframe, resframe, functionframe, classframe, moduleframe
+    sidept_pages = {'file': fileframe, 'code': resframe,
+                    'func': functionframe, 'class': classframe, 'modules': moduleframe}
+    global global_sidept_currpage
+    sidept_pages[global_sidept_currpage].pack_forget()
+    sidept_pages[pagename].pack(fill=tk.BOTH, expand=True)
+    sidept_pages[pagename].pack_propagate(False)
+    global_sidept_currpage = pagename
+
+
+def change_mainpt_page(pagename):
+    """Change the right workspace according to the selected interface"""
+    global welcomepage, editpage
+    mainpt_pages = {'spare': welcomepage, 'file': welcomepage, 'code': editpage,
+                    'func': welcomepage, 'class': welcomepage, 'modules': welcomepage}
+    global global_mainpt_currpage
+    mainpt_pages[global_mainpt_currpage].pack_forget()
+    mainpt_pages[pagename].pack(fill=tk.BOTH, expand=True)
+    mainpt_pages[pagename].pack_propagate(False)
+    global_mainpt_currpage = pagename
+
+
 def change_file(selection: str):
-    # 在边栏文件列表中切换文件时执行
+    """Switch files in the sidebar file list"""
     global view_btns
     file = selection['values'][0]
     print("已选择文件："+str(file))
@@ -328,7 +328,7 @@ def change_file(selection: str):
 
 
 def open_code(selection):
-    # 读取所选的文件 加载代码
+    """Read the selected file and load the code"""
     file_path = selection['values'][0]
     pf = open(file_path, 'r', encoding='utf-8')
     data = pf.read()
@@ -342,13 +342,55 @@ def open_code(selection):
 
 
 def save_code():
+    """Save File"""
     data = code.get("1.0", "end")
     filename = fd.asksaveasfilename()
     with open(filename, 'w', encoding="utf-8") as sf:
         sf.write(data)
 
 
+def scan_class():
+    """Use the find_classes_infile function to search for classes within the specified file and insert them into the list."""
+    # print('Scanning Class...')
+    try:
+        classes = find_classes_in_file(global_file[0])
+        classlist.delete(1, tk.END)
+        for names in classes:
+            classlist.insert('end', names)
+        # classlist.pack(fill='both', expand=True)
+    except IndexError as e:
+        print(e)
+        msgbox.showerror("错误", "请先选择一个文件！\n\n详细错误信息请见Console。")
+
+
+def create_new_class():
+    """Create a new class specified by the user.
+    The options include: 
+        new class name, 
+        inherited class name, 
+        several properties.
+    """
+    ask = ui.Dialog(Application.root, title="创建新类",
+                    textlist=["新类名", "继承名"], btntext="确定", callback=handle_input)
+
+
+def handle_input(lst):
+    """Insert the content entered in the Create New Class dialog box into the list"""
+    if lst:
+        class_name, inherit_name = lst
+        classlist.insert("end", f"{class_name}{inherit_name}")
+
+
+def del_sel_class():
+    """Delete selected class"""
+    sel = classlist.curselection()
+    for i in sel:
+        print(classlist.get(i))
+        classlist.delete(i)
+
+
 def find_classes_in_file(filename):
+    """Find classes in the selected file"""
     print("Scanning for and listing classes...")
     with open(filename, "r", encoding='utf-8') as file:
         node = ast.parse(file.read(), filename=filename)
@@ -358,25 +400,6 @@ def find_classes_in_file(filename):
         if isinstance(item, ast.ClassDef):
             class_names.append(item.name)
     return class_names
-
-
-def upd_greeting():
-    global about_txt
-    # print(about_txt)
-    print("Getting greetings subscription")
-    try:
-        res = get_fr_server({"func": "greetings.get"})
-        if not res['exists']:
-            return None
-        else:
-            print("Greeting detected: "+str(res['msg']))
-            # about_txt.text='v'+str(global_ver)+' | '+str(res['msg'])
-            return str(res['msg'])
-            # about_txt.reprop()
-    except:
-        # mkerr=abc #取消注释本行产生错误，查看详细报错
-        print("[upd_greeting] Failed to connect to server")
-        return None
 
 
 greeting = upd_greeting()
@@ -564,7 +587,7 @@ main_file_viewer.sync_t.start()
 
 
 Application.root.mainloop()
-exit(0)
+os._exit(0)
 
 # 防止主进程没杀死的问题（感谢CodeCrafter-TL修了一个历经半年我都懒得修的bug ——rgzz666）
 # os._exit(1)
