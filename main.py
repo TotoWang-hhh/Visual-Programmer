@@ -31,7 +31,7 @@ class Application:
     """应用程序主体"""
 
     root = tkt.Tk(title='Python Visual Programer')
-    root.theme(bordercolor='#0F0', captioncolor='#00F', titlecolor='#F00')
+    #root.theme(bordercolor='#0F0', captioncolor='#00F', titlecolor='#F00')
     root.withdraw()
 
     def __init__(self) -> None:
@@ -514,7 +514,10 @@ Application.root.title('Python Visual Programmer')
 Application.root.iconbitmap("./icon.ico")
 Application.root.configure(background='#cccccc')
 Application.root.minsize(640, 360)
-Application.root.geometry(size=(800, 540))  # 此处geometry写法仅适用于tkt.Tk()
+try:
+    Application.root.geometry(size=(800, 540))  # 此处geometry写法仅适用于tkt.Tk()
+except:
+    Application.root.geometry("800x540")
 # 防止主进程没杀死的问题（感谢CodeCrafter-TL修了一个历经半年我都懒得修的bug ——rgzz666）
 # Application.root.protocol("WM_DELETE_WINDOW", lambda: Application.root.destroy())
 
