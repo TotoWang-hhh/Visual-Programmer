@@ -1,0 +1,2 @@
+tkintertools==3.0.0rc1
+tkintertools[all]==3.0.0rc1
