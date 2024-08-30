@@ -63,7 +63,8 @@ icon256_pil = icon_pil.resize((256, 256))
 icon256_tk = ImageTk.PhotoImage(image=icon256_pil)
 tk.Label(startwin, image=icon256_tk, bg='#000000').pack()
 startwin.configure(background='#000000')
-startwin.wm_attributes('-transparentcolor', '#000000')
+if sys.platform=="win32":
+    startwin.wm_attributes('-transparentcolor', '#000000')
 startwin.wm_attributes('-alpha', 0)
 # 入场动画
 for i in range(0, 10):
@@ -248,7 +249,7 @@ def about():
                             bg='#ffffff', anchor='w')
     about_updtxt.pack(side=tk.LEFT)
     ui.AnimatedButton(aboutrowc, aboutwin, text='项目GitHub', bg='#cccccc', fg='#000000', floatingbg='#000000', floatingfg='#ffffff',
-                      command=lambda: webbrowser.open("https://github.com/xiaokang2022/visual-programmer")).pack(side=tk.RIGHT)
+                      command=lambda: webbrowser.open("https://github.com/pyvp-team/visual-programmer")).pack(side=tk.RIGHT)
     aboutrowc.pack(fill=tk.X)
     uses_pt = tk.Frame(aboutwin, bg='#dddddd')
     tk.Label(uses_pt, text='本项目使用', bg='#303030', fg='#ffffff').pack(fill=tk.X)
@@ -511,7 +512,8 @@ if not '--noclear' in sys.argv:
 # UI BELOW #
 Application.root.deiconify()
 Application.root.title('Python Visual Programmer')
-Application.root.iconbitmap("./icon.ico")
+if sys.platform=="win32":
+    Application.root.iconbitmap("./icon.ico")
 Application.root.configure(background='#cccccc')
 Application.root.minsize(640, 360)
 try:
